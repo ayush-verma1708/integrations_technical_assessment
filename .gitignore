@@ -1,0 +1,60 @@
+# 📂 Python / FastAPI
+
+# Virtual environment
+venv/
+.env
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+*.log
+
+# FastAPI dependency files
+*.sqlite3
+*.db
+instance/
+.DS_Store
+
+# Logs & cache
+logs/
+*.log
+*.out
+*.pid
+*.gz
+*.swp
+
+# Ignore compiled code
+*.egg-info/
+dist/
+build/
+
+# 📂 Redis Data (if running locally)
+dump.rdb
+*.sock
+
+# 📂 Node.js / React
+
+# Dependencies
+node_modules/
+npm-debug.log
+yarn.lock
+package-lock.json
+
+# Build files
+build/
+dist/
+.cache/
+coverage/
+
+# System files
+*.DS_Store
+Thumbs.db
+
+# IDE/Editor files
+.vscode/
+.idea/
+*.iml
+
+# Miscellaneous
+*.swp
+*.swo
