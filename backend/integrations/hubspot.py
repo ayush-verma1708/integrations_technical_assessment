@@ -149,36 +149,59 @@ def create_integration_item_metadata_object(contact_json) -> IntegrationItem:
     )
 
 
-def fetch_items(access_token: str, url: str, aggregated_response=None, offset=None):
-    """Fetch data recursively from HubSpot API."""
-    if aggregated_response is None:
-        aggregated_response = []
+# def fetch_items(access_token: str, url: str, aggregated_response=None, offset=None):
+#     """Fetch data recursively from HubSpot API."""
+#     if aggregated_response is None:
+#         aggregated_response = []
 
-    params = {'offset': offset} if offset else {}
-    headers = {'Authorization': f'Bearer {access_token}'}
+#     params = {'offset': offset} if offset else {}
+#     headers = {'Authorization': f'Bearer {access_token}'}
     
-    response = requests.get(url, headers=headers, params=params)
+#     response = requests.get(url, headers=headers, params=params)
+
+#     if response.status_code == 200:
+#         data = response.json()
+#         results = data.get('results', [])  # ✅ HubSpot uses "results" key, not "bases"
+#         offset = data.get('paging', {}).get('next', {}).get('after', None)  # ✅ Correct HubSpot pagination
+
+#         aggregated_response.extend(results)  # ✅ Append contacts
+
+#         if offset:
+#             return fetch_items(access_token, url, aggregated_response, offset)  # ✅ Recursive call
+
+#     return aggregated_response  # ✅ Return final data
+
+
+# async def get_items_hubspot(credentials):
+#     """Fetch contacts from HubSpot API"""
+#     access_token = credentials
+#     if not access_token:
+#         return {"error": "Missing access token"}
+    
+#     url = "https://api.hubapi.com/crm/v3/objects/contacts"
+#     list_of_responses = fetch_items(access_token, url)  # ✅ Fetch contacts
+    
+#     return {"contacts": list_of_responses}  # ✅ Return contacts
+
+def fetch_items(access_token: str, url: str, aggregated_response: list):
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = requests.get(url, headers=headers)
 
     if response.status_code == 200:
-        data = response.json()
-        results = data.get('results', [])  # ✅ HubSpot uses "results" key, not "bases"
-        offset = data.get('paging', {}).get('next', {}).get('after', None)  # ✅ Correct HubSpot pagination
+        results = response.json().get("results", [])
+        aggregated_response.extend(results)
 
-        aggregated_response.extend(results)  # ✅ Append contacts
+async def get_items_hubspot(credentials) -> list:
+    url_contacts = "https://api.hubapi.com/crm/v3/objects/contacts"
+    url_deals = "https://api.hubapi.com/crm/v3/objects/deals"
 
-        if offset:
-            return fetch_items(access_token, url, aggregated_response, offset)  # ✅ Recursive call
+    access_token = credentials.get("access_token")
+    list_of_responses = []
 
-    return aggregated_response  # ✅ Return final data
+    # Fetch Contacts
+    fetch_items(access_token, url_contacts, list_of_responses)
 
+    # Fetch Deals
+    fetch_items(access_token, url_deals, list_of_responses)
 
-async def get_items_hubspot(credentials):
-    """Fetch contacts from HubSpot API"""
-    access_token = credentials
-    if not access_token:
-        return {"error": "Missing access token"}
-    
-    url = "https://api.hubapi.com/crm/v3/objects/contacts"
-    list_of_responses = fetch_items(access_token, url)  # ✅ Fetch contacts
-    
-    return {"contacts": list_of_responses}  # ✅ Return contacts
+    return list_of_responses
