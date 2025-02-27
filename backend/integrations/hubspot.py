@@ -9,6 +9,7 @@ from fastapi import Request, HTTPException
 from fastapi.responses import HTMLResponse
 from redis_client import add_key_value_redis, get_value_redis, delete_key_redis
 from .integration_item import IntegrationItem  # Adjust import based on actual location
+import requests
 
 from dotenv import load_dotenv
 import os
@@ -147,35 +148,37 @@ def create_integration_item_metadata_object(contact_json) -> IntegrationItem:
         parent_id=None,
     )
 
-async def get_items_hubspot(credentials) -> list[IntegrationItem]:
-    """Fetch all contacts from HubSpot using stored credentials with pagination."""
-    credentials = json.loads(credentials)
-    access_token = credentials.get("access_token")
+
+def fetch_items(access_token: str, url: str, aggregated_response=None, offset=None):
+    """Fetch data recursively from HubSpot API."""
+    if aggregated_response is None:
+        aggregated_response = []
+
+    params = {'offset': offset} if offset else {}
+    headers = {'Authorization': f'Bearer {access_token}'}
+    
+    response = requests.get(url, headers=headers, params=params)
+
+    if response.status_code == 200:
+        data = response.json()
+        results = data.get('results', [])  # ✅ HubSpot uses "results" key, not "bases"
+        offset = data.get('paging', {}).get('next', {}).get('after', None)  # ✅ Correct HubSpot pagination
+
+        aggregated_response.extend(results)  # ✅ Append contacts
+
+        if offset:
+            return fetch_items(access_token, url, aggregated_response, offset)  # ✅ Recursive call
+
+    return aggregated_response  # ✅ Return final data
+
+
+async def get_items_hubspot(credentials):
+    """Fetch contacts from HubSpot API"""
+    access_token = credentials
     if not access_token:
-        raise HTTPException(status_code=400, detail="Credentials are invalid or missing access token")
-
-    headers = {"Authorization": f"Bearer {access_token}"}
+        return {"error": "Missing access token"}
+    
     url = "https://api.hubapi.com/crm/v3/objects/contacts"
-    items = []
-    after = None
-
-    async with aiohttp.ClientSession() as session:
-        while True:
-            params = {"limit": 100, "after": after} if after else {"limit": 100}
-            async with session.get(url, headers=headers, params=params) as resp:
-                if resp.status == 401:
-                    raise HTTPException(status_code=401, detail="Invalid or expired HubSpot credentials")
-                elif resp.status != 200:
-                    error_detail = await resp.text()
-                    raise HTTPException(status_code=resp.status, detail=f"Failed to fetch HubSpot items: {error_detail}")
-                response_json = await resp.json()
-                contacts = response_json.get("results", [])
-                for contact in contacts:
-                    items.append(create_integration_item_metadata_object(contact))
-                paging = response_json.get("paging", {})
-                after = paging.get("next", {}).get("after")
-                if not after:
-                    break
-
-    print(f"HubSpot Items: {[item.__dict__ for item in items]}")  # Debug output
-    return items
+    list_of_responses = fetch_items(access_token, url)  # ✅ Fetch contacts
+    
+    return {"contacts": list_of_responses}  # ✅ Return contacts
