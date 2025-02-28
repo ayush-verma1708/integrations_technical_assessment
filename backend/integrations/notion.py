@@ -85,6 +85,8 @@ async def get_notion_credentials(user_id, org_id):
 
     return credentials
 
+
+
 def _recursive_dict_search(data, target_key):
     """Recursively search for a key in a dictionary of dictionaries."""
     if target_key in data:
@@ -103,34 +105,21 @@ def _recursive_dict_search(data, target_key):
                         return result
     return None
 
-def create_integration_item_metadata_object(
-    response_json: str,
-) -> IntegrationItem:
-    """creates an integration metadata object from the response"""
-    name = _recursive_dict_search(response_json['properties'], 'content')
-    parent_type = (
-        ''
-        if response_json['parent']['type'] is None
-        else response_json['parent']['type']
-    )
-    if response_json['parent']['type'] == 'workspace':
-        parent_id = None
-    else:
-        parent_id = (
-            response_json['parent'][parent_type]
-        )
-
-    name = _recursive_dict_search(response_json, 'content') if name is None else name
-    name = 'multi_select' if name is None else name
-    name = response_json['object'] + ' ' + name
+# Create IntegrationItem object from HubSpot API response
+def create_integration_item_metadata_object(response_json):
+    """Creates an integration metadata object from the HubSpot API response"""
+    
+    name = _recursive_dict_search(response_json['properties'], 'firstname') or "Unknown Contact"
+    email = response_json['properties'].get('email', 'No Email')
 
     integration_item_metadata = IntegrationItem(
         id=response_json['id'],
-        type=response_json['object'],
+        type=response_json.get('object', 'contact'),
         name=name,
-        creation_time=response_json['created_time'],
-        last_modified_time=response_json['last_edited_time'],
-        parent_id=parent_id,
+        email=email,
+        creation_time=response_json.get('createdAt', ''),
+        last_modified_time=response_json.get('updatedAt', ''),
+        parent_id=None,  # HubSpot doesn't use parent_id like Notion
     )
 
     return integration_item_metadata
