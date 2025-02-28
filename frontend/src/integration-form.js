@@ -92,7 +92,17 @@ export const IntegrationForm = () => {
                 </Box>
             )}
 
-         
+            {integrationParams?.credentials && !loading && (
+                <Box sx={{ mt: 2 }}>
+                    <DataForm
+                        integrationType={integrationParams?.type}
+                        credentials={integrationParams?.credentials}
+                        setLoading={setLoading} // Pass setLoading to DataForm
+                        setError={setError} // Pass setError to DataForm
+                    />
+                </Box>
+       )}
+
         </Box>
     );
 };
