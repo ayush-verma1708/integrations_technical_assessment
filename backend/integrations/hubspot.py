@@ -143,66 +143,6 @@ async def get_hubspot_credentials(user_id, org_id):
     
     return credentials_json
 
-# # Helper function to recursively search for keys in nested dictionaries
-# def _recursive_dict_search(data, target_key):
-#     """Recursively search for a key in a dictionary of dictionaries."""
-#     if target_key in data:
-#         return data[target_key]
-
-#     for value in data.values():
-#         if isinstance(value, dict):
-#             result = _recursive_dict_search(value, target_key)
-#             if result is not None:
-#                 return result
-#         elif isinstance(value, list):
-#             for item in value:
-#                 if isinstance(item, dict):
-#                     result = _recursive_dict_search(item, target_key)
-#                     if result is not None:
-#                         return result
-#     return None
-
-# # Create IntegrationItem object from HubSpot API response
-# def create_integration_item_metadata_object(response_json):
-#     """Creates an integration metadata object from the HubSpot API response"""
-    
-#     name = _recursive_dict_search(response_json['properties'], 'firstname') or "Unknown Contact"
-#     email = response_json['properties'].get('email', 'No Email')
-
-#     integration_item_metadata = IntegrationItem(
-#         id=response_json['id'],
-#         type=response_json.get('object', 'contact'),
-#         name=name,
-#         email=email,
-#         creation_time=response_json.get('createdAt', ''),
-#         last_modified_time=response_json.get('updatedAt', ''),
-#         parent_id=None,  # HubSpot doesn't use parent_id like Notion
-#     )
-
-#     return integration_item_metadata
-
-
-# async def get_items_hubspot(credentials) -> list[IntegrationItem]:
-#     """Aggregates all metadata relevant for a notion integration"""
-#     print("on request",credentials)
-#     response = requests.post(
-#         'https://api.hubapi.com/crm/v3/objects/deals',
-        
-#         headers={
-#             'Authorization': f'Bearer {credentials.get("access_token")}',
-#         },
-#     )
-
-#     if response.status_code == 200:
-#         results = response.json()['results']
-#         list_of_integration_item_metadata = []
-#         for result in results:
-#             list_of_integration_item_metadata.append(
-#                 create_integration_item_metadata_object(result)
-#             )
-
-#         print(list_of_integration_item_metadata)
-#     return
 
 def _recursive_dict_search(data, target_key):
     """Recursively search for a key in a dictionary of dictionaries."""
