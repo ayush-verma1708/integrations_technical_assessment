@@ -19,74 +19,28 @@ export const DataForm = ({ integrationType, credentials }) => {
         return <Box>Error: Unsupported integration type</Box>;
     }
 
-    // const handleLoad = async () => {
-    //     try {
-    //         // const response = await axios.post(
-    //         //     `http://localhost:8000/integrations/${endpoint}/load`,
-    //         //     { credentials: JSON.stringify(credentials) }, // Ensure credentials are sent as JSON string
-    //         //     {
-    //         //         headers: {
-    //         //             'Content-Type': 'application/json',
-    //         //             ...(integrationType === 'HubSpot' && credentials?.access_token
-    //         //                 ? { Authorization: `Bearer ${credentials.access_token}` } // ✅ Add OAuth token
-    //         //                 : {}),
-    //         //         },
-    //         //     }
-    //         // );
-    //         // const response = await axios.post(
-    //         //     `http://localhost:8000/integrations/${endpoint}/load`,
-    //         //     { credentials }, // ✅ Send as JSON object, not string
-    //         //     {
-    //         //         headers: {
-    //         //             'Content-Type': 'application/json',
-    //         //             ...(integrationType === 'HubSpot' && credentials?.access_token
-    //         //                 ? { Authorization: `Bearer ${credentials.access_token}` }
-    //         //                 : {}),
-    //         //         },
-    //         //     }
-    //         // );
-    //         const response = await axios.post(
-    //             `http://localhost:8000/integrations/${endpoint}/load`,
-    //             credentials, // ✅ Send credentials directly, not wrapped in an object
-    //             {
-    //                 headers: {
-    //                     'Content-Type': 'application/json',
-    //                     ...(integrationType === 'HubSpot' && credentials?.access_token
-    //                         ? { Authorization: `Bearer ${credentials.access_token}` }
-    //                         : {}),
-    //                 },
-    //             }
-    //         );
-
-    //         setLoadedData(response.data);
-    //     } catch (e) {
-    //         console.error(e);
-    //         alert(e?.response?.data?.detail || 'Error loading data');
-    //     }
-    // };
-
-    const handleLoad = async () => {
-        console.log("Sending credentials:", credentials.access_token);
-        // try {
-        //     console.log("Sending credentials:", credentials.access_token);
-        //     const response = await axios.post(
-        //         `http://localhost:8000/integrations/${endpoint}/load`,
-        //         credentials, // ✅ Send credentials directly, not as { credentials: credentials }
-        //         {
-        //             headers: {
-        //                 'Content-Type': 'application/json',
-        //                 ...(integrationType === 'HubSpot' && credentials?.access_token
-        //                     ? { Authorization: `Bearer ${credentials.access_token}` }
-        //                     : {}),
-        //             },
-        //         }
-        //     );
     
-        //     setLoadedData(response.data);
-        // } catch (e) {
-        //     console.error(e);
-        //     alert(e?.response?.data?.detail || 'Error loading data');
-        // }
+    const handleLoad = async () => {
+        console.log("Sending credentials:", credentials);
+        try {
+            const response = await axios.post(
+                `http://localhost:8000/integrations/${endpoint}/load`,
+                credentials, // ✅ Send credentials directly
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(integrationType === 'HubSpot' && credentials?.access_token
+                            ? { Authorization: `Bearer ${credentials.access_token}` }
+                            : {}),
+                    },
+                }
+            );
+    
+            setLoadedData(response.data);
+        } catch (e) {
+            console.error(e);
+            alert(e?.response?.data?.detail || 'Error loading data');
+        }
     };
     
 

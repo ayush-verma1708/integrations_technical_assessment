@@ -5,6 +5,9 @@ import {
     TextField,
     CircularProgress,
     Alert,
+    Typography,
+    Paper,
+    IconButton,
 } from '@mui/material';
 import { AirtableIntegration } from './integrations/airtable';
 import { NotionIntegration } from './integrations/notion';
@@ -32,6 +35,11 @@ export const IntegrationForm = () => {
         setIntegrationParams({}); // Clear params to avoid stale credentials
         setError(null); // Clear any previous errors
     };
+
+    const handleCopyToken = () => {
+        navigator.clipboard.writeText(integrationParams.credentials.access_token);
+    };
+
 
     return (
         <Box display="flex" justifyContent="center" alignItems="center" flexDirection="column" sx={{ width: '100%' }}>
@@ -84,16 +92,7 @@ export const IntegrationForm = () => {
                 </Box>
             )}
 
-            {integrationParams?.credentials && !loading && (
-                <Box sx={{ mt: 2 }}>
-                    <DataForm
-                        integrationType={integrationParams?.type}
-                        credentials={integrationParams?.credentials}
-                        setLoading={setLoading} // Pass setLoading to DataForm
-                        setError={setError} // Pass setError to DataForm
-                    />
-                </Box>
-            )}
+         
         </Box>
     );
 };

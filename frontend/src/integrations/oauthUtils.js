@@ -36,3 +36,5 @@ export const connectToService = async (service, user, org, setIsConnecting, setI
         alert(e?.response?.data?.detail || `Error connecting to ${service}`);
     }
 };
+
+
